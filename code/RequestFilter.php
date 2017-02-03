@@ -1,23 +1,24 @@
 <?php
 
-namespace Sminnee\SilverStripeIntercom;
+namespace SilverStripe\Intercom;
 
-use SS_HTTPRequest;
-use SS_HTTPResponse;
-use Session;
-use DataModel;
-use ViewableData;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\HTTPResponse;
+use SilverStripe\Control\RequestFilter as BaseRequestFilter;
+use SilverStripe\Control\Session;
+use SilverStripe\ORM\DataModel;
+use SilverStripe\View\ViewableData;
 
 /**
  * Add HTML content before the </body> of a full HTML page.
  * Used to include IntercomScriptTags into a page
  */
-class RequestFilter implements \RequestFilter
+class RequestFilter implements BaseRequestFilter
 {
     /**
      * Does nothing
      */
-    public function preRequest(SS_HTTPRequest $request, Session $session, DataModel $model)
+    public function preRequest(HTTPRequest $request, Session $session, DataModel $model)
     {
     }
 
@@ -32,7 +33,7 @@ class RequestFilter implements \RequestFilter
     /**
      * Adds Intercom script tags just before the body
      */
-    public function postRequest(SS_HTTPRequest $request, SS_HTTPResponse $response, DataModel $model)
+    public function postRequest(HTTPRequest $request, HTTPResponse $response, DataModel $model)
     {
         $mime = $response->getHeader('Content-Type');
         if (!$mime || strpos($mime, 'text/html') !== false) {

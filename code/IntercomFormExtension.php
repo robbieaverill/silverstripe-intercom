@@ -1,12 +1,12 @@
 <?php
 
-namespace Sminnee\SilverStripeIntercom;
+namespace SilverStripe\Intercom;
 
-use SS_Log;
-use DataExtension;
-use LogicException;
-use Injector;
 use Exception;
+use LogicException;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Intercom\Intercom;
+use SilverStripe\ORM\DataExtension;
 
 /**
  * Adds functionality to forms to integrate with Intercom
@@ -16,7 +16,6 @@ use Exception;
  */
 class IntercomFormExtension extends DataExtension
 {
-
     /**
      * A map of form field names to Intercom lead fields.
      * [
@@ -35,7 +34,7 @@ class IntercomFormExtension extends DataExtension
      * @var array
      */
     protected $intercomCompanyFieldMapping = [];
-    
+
     /**
      * A list of form field names that should be thrown into Intercom notes for the user, mapped
      * to the labels that should be used in the note
@@ -54,8 +53,8 @@ class IntercomFormExtension extends DataExtension
 
     /**
      * Adds mapping of form fields to intercom user fields
-     * @param array
-     * @return  Form
+     * @param  array
+     * @return Form
      */
     public function addIntercomUserFieldMapping($fields)
     {
@@ -81,8 +80,8 @@ class IntercomFormExtension extends DataExtension
 
     /**
      * Adds mapping of form fields to intercom company fields
-     * @param array
-     * @return  Form
+     * @param  array
+     * @return Form
      */
     public function addIntercomCompanyFieldMapping($fields)
     {
@@ -108,8 +107,8 @@ class IntercomFormExtension extends DataExtension
 
     /**
      * Adds mapping of note fields
-     * @param array
-     * @return  Form
+     * @param  array
+     * @return Form
      */
     public function addIntercomNoteMapping($noteFields)
     {
@@ -135,8 +134,8 @@ class IntercomFormExtension extends DataExtension
 
     /**
      * Sets the note header
-     * @param string
-     * @return  Form
+     * @param  string
+     * @return Form
      */
     public function setIntercomNoteHeader($header)
     {
@@ -150,9 +149,10 @@ class IntercomFormExtension extends DataExtension
      *
      * To map to a custom attribute, use $my_custom_attribute
      *
-     * @param string $formField     The name of the form field
-     * @param string $intercomField The name of the intercom field it maps to
-     * @param array $data           The array of mappings to update
+     * @param  string $formField     The name of the form field
+     * @param  string $intercomField The name of the intercom field it maps to
+     * @param  array $data           The array of mappings to update
+     * @return array
      */
     protected function addMappings($formField, $intercomField, $data)
     {
@@ -171,17 +171,18 @@ class IntercomFormExtension extends DataExtension
 
     /**
      * Sends the form data to Intercom, using the defined mappings
+     * @throws LogicException if some of the required configuration is missing
      */
     public function sendToIntercom()
     {
-        if (empty($this->intercomFieldMapping) &&
-            empty($this->intercomNoteMapping) &&
-            empty($this->intercomCompanyFieldMapping)
+        if (empty($this->intercomFieldMapping)
+            && empty($this->intercomNoteMapping)
+            && empty($this->intercomCompanyFieldMapping)
         ) {
             throw new LogicException('You must define mapped fields to send a form submission to intercom, using Form::setIntercomFieldMapping() or Form::setIntercomNoteMapping()');
         }
 
-        $intercom = Injector::inst()->get('Sminnee\SilverStripeIntercom\Intercom');
+        $intercom = Injector::inst()->get(Intercom::class);
         $leadData = [];
 
         foreach ($this->intercomUserFieldMapping as $formField => $intercomField) {
@@ -222,13 +223,13 @@ class IntercomFormExtension extends DataExtension
                         'user' => ['id' => $lead['id']]
                     ]);
                 } catch (Exception $e) {
-                    SS_Log::log("Could not create note: {$e->getMessage()}", SS_Log::WARN);
+                    Injector::inst()->get('Logger')->addWarning("Could not create note: {$e->getMessage()}");
                 }
 
                 $this->owner->invokeWithExtensions('afterSendToIntercom', $leadData);
             }
         } catch (Exception $e) {
-            SS_Log::log("Could not create user: {$e->getMessage()}", SS_Log::WARN);
+            Injector::inst()->get('Logger')->addWarning("Could not create user: {$e->getMessage()}");
         }
     }
 }

@@ -1,25 +1,24 @@
 <?php
 
-namespace Sminnee\SilverStripeIntercom;
+namespace SilverStripe\Intercom;
 
 use LogicException;
 use Intercom\IntercomClient;
-use SS_List;
-use Member;
-use Config;
-use Injector;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Security\Member;
+use SilverStripe\ORM\SS_List;
 
 /**
  * Entry point for interaction with with Intercom.
  */
 class Intercom
 {
-
     private $personalAccessToken;
     private $appId;
     private $client;
 
-    function __construct()
+    public function __construct()
     {
         if (defined('INTERCOM_PERSONAL_ACCESS_TOKEN')) {
             $this->personalAccessToken = INTERCOM_PERSONAL_ACCESS_TOKEN;
@@ -29,7 +28,7 @@ class Intercom
         }
     }
 
-    function getPersonalAccessToken()
+    public function getPersonalAccessToken()
     {
         if (!$this->personalAccessToken) {
             throw new LogicException("Intercom Personal Access Token not set! Define INTERCOM_PERSONAL_ACCESS_TOKEN or use Injector to set Personal Access Token");
@@ -37,19 +36,19 @@ class Intercom
         return $this->personalAccessToken;
     }
 
-    function setPersonalAccessToken($token)
+    public function setPersonalAccessToken($token)
     {
         $this->personalAccessToken = $token;
     }
 
-    function getAppId()
+    public function getAppId()
     {
         if (!$this->appId) {
             throw new LogicException("Intercom App ID not set! Define INTERCOM_APP_ID or use Injector to set AppId");
         }
         return $this->appId;
     }
-    function setAppId($appId)
+    public function setAppId($appId)
     {
         $this->appId = $appId;
     }
@@ -71,7 +70,7 @@ class Intercom
      */
     public function getUserList()
     {
-        if ($userList = Config::inst()->get('Sminnee\SilverStripeIntercom\Intercom', 'user_list')) {
+        if ($userList = Config::inst()->get(__CLASS__, 'user_list')) {
             if (substr($userList, 0, 2) != '%$') {
                 throw new \InvalidArgumentException("Please set user_list to a string of the form %\$ServiceName");
             }
@@ -89,8 +88,8 @@ class Intercom
      */
     public function bulkLoadUsers(SS_List $members)
     {
-        $userFields = Config::inst()->get('Intercom', 'user_fields');
-        $companyFields = Config::inst()->get('Intercom', 'company_fields');
+        $userFields = Config::inst()->get(__CLASS__, 'user_fields');
+        $companyFields = Config::inst()->get(__CLASS__, 'company_fields');
 
         $scriptTags = new IntercomScriptTags();
 
@@ -146,7 +145,7 @@ class Intercom
      * @param  array $eventData A map of event data. Passed straight to intercom.
      * @param Member $member - if not provided, it will try to use Member::currentUser();
      */
-    function trackEvent($eventName, $eventData = array(), Member $member = null)
+    public function trackEvent($eventName, $eventData = array(), Member $member = null)
     {
         $payload = array(
             'event_name' => $eventName,

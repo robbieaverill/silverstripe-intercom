@@ -1,9 +1,10 @@
 <?php
 
-namespace Sminnee\SilverStripeIntercom;
+namespace SilverStripe\Intercom;
 
-use Member;
-use ViewableData;
+use SilverStripe\Core\Convert;
+use SilverStripe\Security\Member;
+use SilverStripe\View\ViewableData;
 
 /**
  * Generates the IntercomScriptTags.
@@ -11,10 +12,15 @@ use ViewableData;
  */
 class IntercomScriptTags extends ViewableData
 {
-   
-
+    /**
+     * @var bool
+     */
     private static $enabled = true;
 
+    /**
+     * @param  Member $member
+     * @return bool
+     */
     public function isEnabled(Member $member = null)
     {
         if (!defined('INTERCOM_APP_ID')) {
@@ -88,11 +94,16 @@ class IntercomScriptTags extends ViewableData
             }
         };
 
-
         $this->extend('updateIntercomSettings', $settings);
         return $settings;
     }
 
+    /**
+     * @todo Needs to use the token instead now, will that affect existing hashes?
+     *
+     * @param  string $identifier
+     * @return string|null
+     */
     public function generateUserHash($identifier)
     {
         if (defined('INTERCOM_SECRET_KEY')) {
@@ -101,17 +112,20 @@ class IntercomScriptTags extends ViewableData
         }
     }
 
-    function IntercomSettingsJSON()
+    /**
+     * @return string JSON
+     */
+    public function IntercomSettingsJSON()
     {
-        return json_encode($this->getIntercomSettings());
+        return Convert::raw2json($this->getIntercomSettings());
     }
 
-    function forTemplate()
+    public function forTemplate()
     {
         if (!$this->isEnabled()) {
             return null;
         }
 
-        return $this->renderWith('IntercomScriptTags');
+        return $this->renderWith(__CLASS__);
     }
 }

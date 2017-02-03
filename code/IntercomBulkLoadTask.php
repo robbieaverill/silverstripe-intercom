@@ -1,13 +1,22 @@
 <?php
 
+namespace SilverStripe\Intercom;
+
+use SilverStripe\Control\Director;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Dev\Debug;
+use SilverStripe\Intercom\Intercom;
+
 /**
  * Build task to bulk-load all relevant users into Intercom via the API
  */
 class IntercomBulkLoadTask extends BuildTask
 {
-    function run($request)
+    private static $segment = 'IntercomBulkLoadTask';
+
+    public function run($request)
     {
-        $intercom = Injector::inst()->get('Sminnee\SilverStripeIntercom\Intercom');
+        $intercom = Injector::inst()->get(Intercom::class);
 
         if ($jobID = $request->getVar('JobID')) {
             $job = $intercom->getBulkJob($request->getVar('JobID'));

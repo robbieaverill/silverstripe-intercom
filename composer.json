@@ -1,5 +1,5 @@
 {
-    "name": "sminnee/silverstripe-intercom",
+    "name": "silverstripe/intercom",
     "description": "SilverStripe integration with Intercom.io",
     "type": "silverstripe-module",
     "require": {
@@ -18,5 +18,18 @@
             "name": "Sam Minnée",
             "email": "sam@silverstripe.com"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-4": {
+            "SilverStripe\\Intercom\\": "code/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SilverStripe\\Intercom\\Tests\\": "tests/"
+        }
+    },
+    "replace": {
+        "sminnee/silverstripe-intercom": "*"
+    }
 }
