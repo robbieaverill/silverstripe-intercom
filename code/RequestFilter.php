@@ -14,33 +14,35 @@ use ViewableData;
  */
 class RequestFilter implements \RequestFilter
 {
-	/**
-	 * Does nothing
-	 */
-	public function preRequest(SS_HTTPRequest $request, Session $session, DataModel $model) {
+    /**
+     * Does nothing
+     */
+    public function preRequest(SS_HTTPRequest $request, Session $session, DataModel $model)
+    {
+    }
 
-	}
+    /**
+     * Provide a ViewableData object that will render the tags to include.
+     */
+    public function setTagProvider(ViewableData $tagProvider)
+    {
+        $this->tagProvider = $tagProvider;
+    }
 
-	/**
-	 * Provide a ViewableData object that will render the tags to include.
-	 */
-	public function setTagProvider(ViewableData $tagProvider) {
-		$this->tagProvider = $tagProvider;
-	}
+    /**
+     * Adds Intercom script tags just before the body
+     */
+    public function postRequest(SS_HTTPRequest $request, SS_HTTPResponse $response, DataModel $model)
+    {
+        $mime = $response->getHeader('Content-Type');
+        if (!$mime || strpos($mime, 'text/html') !== false) {
+            $tags = $this->tagProvider->forTemplate();
 
-	/**
-	 * Adds Intercom script tags just before the body
-	 */
-	public function postRequest(SS_HTTPRequest $request, SS_HTTPResponse $response, DataModel $model) {
-		$mime = $response->getHeader('Content-Type');
-		if(!$mime || strpos($mime, 'text/html') !== false) {
-			$tags = $this->tagProvider->forTemplate();
-
-			if($tags) {
-				$content = $response->getBody();
-				$content = preg_replace("/(<\/body[^>]*>)/i", $tags . "\\1", $content);
-				$response->setBody($content);
-			}
-		}
-	}
+            if ($tags) {
+                $content = $response->getBody();
+                $content = preg_replace("/(<\/body[^>]*>)/i", $tags . "\\1", $content);
+                $response->setBody($content);
+            }
+        }
+    }
 }
